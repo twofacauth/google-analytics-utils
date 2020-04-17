@@ -15,12 +15,12 @@
 /**
 * Config
 */
-//const projectId = 'my-project-name'
+const projectId = 'my-project-name'
 const query = 'select * from `crmdata.leads` limit 100;'
 const sleepTimeMs = 500;
 const strUa = 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:46.0) Gecko/20100101 Firefox/46.0'
-//const strUrl = 'https://www.google-analytics.com/collect'
-const strUrl = 'https://www.google-analytics.com/debug/collect' // debug
+const strUrl = 'https://www.google-analytics.com/collect'
+//const strUrl = 'https://www.google-analytics.com/debug/collect' // debug
 const oParamsCommon = {
   'v': 1,
   'tid': 'UA-99999999-1',
