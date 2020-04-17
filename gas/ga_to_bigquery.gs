@@ -1,4 +1,15 @@
 /**
+* ga_to_bigquery.gs
+*
+* Copyright (c) 2020 Takamichi Yanai
+*
+* Released under the MIT license.
+* see https://opensource.org/licenses/MIT
+*
+* Retrieves Google Analytics report data via API and sends them to Bigquery
+*/
+
+/**
 * Config
 */
 const today = new Date()
