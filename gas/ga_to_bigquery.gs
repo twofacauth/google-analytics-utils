@@ -88,21 +88,20 @@ function runReportV4(reportRequest) {
 
 /**
 * Loads a CSV into BigQuery
-* @param {Object[]} fields - BigQuery column definition.
-* @param {string} fields[].name - column name
-* @param {string} fields[].type - column type INTEGER|STRING|FLOAT|BOOLEAN
-* @param {(number|string)[][]} data - data to load
 * @param {string} projectId - GCP project id
 * @param {string} datasetId - BigQuery dataset name
 * @param {string} tableId - BigQuery table name
+* @param {(number|string)[][]} data - data to load
+* @param {Object[]=} fields - BigQuery column definition.
+* @param {string} fields[].name - column name
+* @param {string} fields[].type - column type INTEGER|STRING|FLOAT|BOOLEAN
 */
-function loadCsv(fields, data, projectId, datasetId, tableId) {
+function loadCsv(projectId, datasetId, tableId, data, fields) {
   // Load CSV data from Drive and convert to the correct format for upload.
-  let csv = data.map(row => '"' + row.join('","') + '"').join("\n");
-  let blob = Utilities.newBlob(csv, 'text/csv');
-  
+  let csv = data.map(row => '"' + row.join('","') + '"').join("\n")
+  let blob = Utilities.newBlob(csv, 'text/csv')
   // Create the data upload job.
-  let job = {
+  var job = {
     configuration: {
       load: {
         destinationTable: {
@@ -111,22 +110,21 @@ function loadCsv(fields, data, projectId, datasetId, tableId) {
           tableId: tableId
         },
         sourceFormat: 'CSV',
-        skipLeadingRows: 0,
+        skipLeadingRows: typeof(fields) !== 'undefined' ? 0 : 1,
         writeDisposition: 'WRITE_TRUNCATE',
-        schema: {
-          fields: fields
-        },
+        autodetect: !(typeof(fields) !== 'undefined'),
+        schema: typeof(fields) !== 'undefined' ? {fields: fields} : null,
         createDisposition: 'CREATE_IF_NEEDED',
       }
     }
-  };
-  job = BigQuery.Jobs.insert(job, projectId, blob);
+  }
+  job = BigQuery.Jobs.insert(job, projectId, blob)
 }
 
 // Get a report data and send to BigQuery.
 function myFunction() {
   let {fields, data} = runReportV4(request)
-  loadCsv(fields, data, projectId, datasetId, tableId)
+  loadCsv(projectId, datasetId, tableId, data, fields)
   Logger.log("Finished: " + data.length + " rows.")
 }
 
