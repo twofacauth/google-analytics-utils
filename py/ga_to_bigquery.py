@@ -3,6 +3,7 @@ from googleapiclient.discovery import build
 import sys
 from time import sleep
 import pandas as pd
+import copy
 
 '''
 Extract Google Analytics API report data and insert into BigQuery.
@@ -130,7 +131,7 @@ request_body = {
 ################################################################################
 def get_google_analytics(request_body):
   analytics = build('analyticsreporting', 'v4', credentials=scoped_credentials)
-  request_body_ = request_body.copy()
+  request_body_ = copy.deepcopy(request_body)
   n_requests = len(request_body_['reportRequests'])
   results = [{}] * n_requests
   finished = [False] * n_requests
