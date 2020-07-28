@@ -4,7 +4,6 @@ import sys
 from time import sleep
 import pandas as pd
 import copy
-import logging
 
 '''
 Extract Google Analytics API report data and insert into BigQuery.
@@ -14,9 +13,9 @@ Usage:
 
 You can specify
 
-- date range programatically in line 110-111
-- report query in line 107-
-- authentication method between user-based and service account-based in line 38-89
+- date range programatically in line 122-123
+- report query in line 119-
+- authentication method between user-based and service account-based in line 50-101
 
 Authentication method:
 
@@ -31,6 +30,19 @@ Authentication method:
 
 Choose one of the three and comment out the others.
 '''
+
+################################################################################
+# Logging
+################################################################################
+from logger import getLogger, StreamHandler, Formatter, INFO
+logger = getLogger(__name__)
+logger.setLevel(INFO)
+handler = StreamHandler()
+handler.setLevel(INFO)
+formatter = Formatter('%(asctime)s - %(filename)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.propagate = False
 
 ################################################################################
 # Authentication
@@ -188,20 +200,18 @@ def get_google_analytics(request_body):
 ################################################################################
 # Process data
 ################################################################################
-if __name__ == '__main__':
-  logging.basicConfig(level=logging.INFO, format='%(asctime)s- %(name)s - %(levelname)s - %(message)s')
-  logging.info('Started.')
-  
-  # Retrive the data
-  results = get_google_analytics(request_body)
+logger.info('Started.')
 
-  # Import to BigQuery
-  df = pd.DataFrame.from_dict(results[0]['rows'])
-  logging.info("DataFrame size: %s" % (df.shape,))
-  df.to_gbq('ga.pvlog', project_id='my-project', credentials=scoped_credentials, chunksize=100000, if_exists='append')
+# Retrive the data
+results = get_google_analytics(request_body)
 
-  # Execute a query.
-  query = '''
+# Import to BigQuery
+df = pd.DataFrame.from_dict(results[0]['rows'])
+logger.info("DataFrame size: %s" % (df.shape,))
+df.to_gbq('ga.pvlog', project_id='my-project', credentials=scoped_credentials, chunksize=100000, if_exists='append')
+
+# Execute a query.
+query = '''
 create or replace table `ga.enriched_pvlog`
 partition by date
 as
@@ -210,8 +220,8 @@ select
 from ga.pvlog
 ;
 '''[1:-1]
-  from google.cloud import bigquery
-  bigquery_client = bigquery.Client(credentials=scoped_credentials, project='my-project')
-  query_job = bigquery_client.query(query)
-  query_job.result()
-  logging.info('Finished.')
+from google.cloud import bigquery
+bigquery_client = bigquery.Client(credentials=scoped_credentials, project='my-project')
+query_job = bigquery_client.query(query)
+query_job.result()
+logger.info('Finished.')
