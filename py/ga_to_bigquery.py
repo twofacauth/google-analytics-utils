@@ -34,7 +34,7 @@ Choose one of the three and comment out the others.
 ################################################################################
 # Logging
 ################################################################################
-from logger import getLogger, StreamHandler, Formatter, INFO
+from logging import getLogger, StreamHandler, Formatter, INFO
 logger = getLogger(__name__)
 logger.setLevel(INFO)
 handler = StreamHandler()
